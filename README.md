@@ -4,9 +4,9 @@
 Compares the blockhashes of explorer.teloscoin.org, telos.polispay.com and your local wallet.
 
 ### Configuration
-* `FORKTHRESHOLD` - (default: 60) sets how much Master Nodes the explorer should know, else we think it is forked and exit.
 * `SAFEMARGIN` - (default: 50) we don't compare the latest hashes, as they are subject to change due to consensus. We compare the hash of (blockheight - $SAFEMARGIN) to rule out orphan hashes.
 * `TRANSCENDENCE` - (default: ./transcendence-cli) sets where the transcendence-cli binary is. The default refers to the directory where this script is run from.
+* `IFTTTKEY` - (default: none) enter your key for IFTTT to get a push notification when you are forked.
 
 ### How to run
 ```
@@ -15,13 +15,31 @@ chmod u+x forkwatch.sh
 ./forkwatch.sh
 ```
 
-### Cron
+### Cron with e-mail
 This assumes you have a working mailing system (Exim, Postfix,...) on your server. If not, you cannot be alarmed by email and putting the script into cron would be pointless.
 This will only email you in case of errors, and like this, would run every hour. Feel free to change the 0 to something else, to avoid the server being hammered at full hours.
 ```
 MAILTO=your@email-address.com
-0       *       *       *       *       /home/your-user/path-to-the-script/forkwatch.sh  > /dev/null
+0       *       *       *       *       /home/your-user/path-to-the-script/forkwatch.sh > /dev/null
 ```
+
+### Cron with IFTTT
+Put this into your crontab. Note the difference to the cron command above.
+Feel free to change the 0 to something else, to avoid the server being hammered at full hours.
+```
+0       *       *       *       *       /home/your-user/path-to-the-script/forkwatch.sh > /dev/null 2>&1
+```
+You have to have a working IFTTT account. If you have none, create a free account on www.ifttt.com. Then follow these instructions:
+1. Go to https://ifttt.com/maker_webhooks and click "Connect"
+1. Click on "Documentation" in the upper right, copy the part after /key/ and put it in `IFTTTKEY` in the script
+1. Click on "Create" in the upper menu and "Add"
+1. Type "Webhooks", click on the Webhooks square and then on "Receive a web request"
+1. Give it the event name "notify" and click "Create Trigger"
+1. Under "Then That" click on "Add" and type "Notifications", click on the square
+1. Click on "Send a notification from the IFTTT app"
+1. Delete the sample message and write: "Notification: {{Value1}}"
+1. Click "Create Action", "Continue", "Finish".
+1. Install the IFTTT app on your iPhone or Android and log in with your account. You will now receive a push message when your watched wallet is forked.
 
 ### Caveats
 This script cannot provide guidance if:
@@ -33,5 +51,3 @@ This script cannot provide guidance if:
 * there is no error checking for downtime or errors of the explorer or PolisPay
 * there is no checking whether you have the current wallet version
 * the script can't detect stuck wallets and `getblockhash` will return an error (well, there is your detection)
-* the script should compare the count of masternodes your local wallet can see against the explorer's count, not use an arbitrary value
-* the script itself can't send emails. To not require a mailserver to be installed, we should use a lightweight smtp mailer
