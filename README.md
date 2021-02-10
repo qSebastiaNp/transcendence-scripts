@@ -32,7 +32,6 @@ This script cannot provide guidance if:
 ### ToDo / Known Problems
 * there is no error checking for downtime or errors of the explorer or PolisPay
 * there is no checking whether you have the current wallet version
-* when explorer forks away, the script will report that *you* are forked, because explorer is always right. Isn't it?
 * the script can't detect stuck wallets and `getblockhash` will return an error (well, there is your detection)
 * the script should compare the count of masternodes your local wallet can see against the explorer's count, not use an arbitrary value
 * the script itself can't send emails. To not require a mailserver to be installed, we should use a lightweight smtp mailer
