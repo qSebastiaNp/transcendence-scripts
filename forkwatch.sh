@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# forkwatch.sh v1.0.1 - qSebastiaNp
+
 # config
-FORKTHRESHOLD=60 # less MNs than this and explorer may have forked - we don't continue
 SAFEMARGIN=50 # use hash of (blockheight - $SAFEMARGIN) to rule out orphan hashes
 TRANSCENDENCE=./transcendence-cli
+IFTTTKEY=none
 
 # no need to change anything from here --->
 GREEN='\033[0;32m'
@@ -11,16 +13,17 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 if [ ! -f "$TRANSCENDENCE" ]; then
-        &>2 echo "* Could not find $TRANSCENDENCE. Please check the configuration at the top of this script."
+        >&2 echo "* Could not find $TRANSCENDENCE. Please check the configuration at the top of this script."
         exit 1
 fi
 
 MNCOUNT=`wget -qO- https://explorer.teloscoin.org/ext/getmasternodecount`
+LOCALMNCOUNT=`$TRANSCENDENCE masternode count | grep -w stable | cut -d' ' -f4 | cut -d',' -f1`
 
-# check if explorer looks safe
-if [ $MNCOUNT -lt $FORKTHRESHOLD ]
+# check if explorer knows enough masternodes, else it may be forked
+if [ $MNCOUNT -lt $(($LOCALMNCOUNT/2)) ]
 then
-        >&2 echo "* Explorer reports $MNCOUNT MNs, which is under the threshold of $FORKTHRESHOLD. It may have forked. Exiting..."
+        >&2 echo "* Explorer reports $MNCOUNT MNs, which is much lower than your $LOCALMNCOUNT. It may have forked. Exiting..."
         exit 1
 fi
 
@@ -58,5 +61,11 @@ then
 else
         >&2 echo "Your blockhash for block $SAFEBLOCKHEIGHT differs from explorer's."
         >&2 echo -e "It seems ${RED}YOU ARE FORKED${NC}. Exiting..."
+
+        # send push notification - read README.MD
+        if [ $IFTTTKEY != 'none' ]
+        then
+                wget -qO- -post-data='{"value1":"It seems `hostname` is FORKED."}' --header='Content-Type:application/json' https://maker.ifttt.com/trigger/notify/with/key/$IFTTTKEY
+        fi
         exit 1
 fi
