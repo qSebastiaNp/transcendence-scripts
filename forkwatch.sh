@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# forkwatch.sh v1.0.1 - qSebastiaNp
+# forkwatch.sh v1.0.2 - qSebastiaNp
 
 # config
 SAFEMARGIN=50 # use hash of (blockheight - $SAFEMARGIN) to rule out orphan hashes
@@ -65,7 +65,7 @@ else
         # send push notification - read README.MD
         if [ $IFTTTKEY != 'none' ]
         then
-                wget -qO- -post-data='{"value1":"It seems `hostname` is FORKED."}' --header='Content-Type:application/json' https://maker.ifttt.com/trigger/notify/with/key/$IFTTTKEY
+                wget -q --post-data="{\"value1\":\"It seems `hostname` is FORKED.\"}" --header='Content-Type:application/json' https://maker.ifttt.com/trigger/notify/with/key/$IFTTTKEY
         fi
         exit 1
 fi
