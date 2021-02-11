@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# forkwatch.sh v1.0.2 - qSebastiaNp
+# forkwatch.sh v1.0.3 - qSebastiaNp
 
 # config
 SAFEMARGIN=50 # use hash of (blockheight - $SAFEMARGIN) to rule out orphan hashes
@@ -12,8 +12,15 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+# check if transcendence-cli file exists
 if [ ! -f "$TRANSCENDENCE" ]; then
         >&2 echo "* Could not find $TRANSCENDENCE. Please check the configuration at the top of this script."
+        exit 1
+fi
+
+# check if wallet is running
+if [ `ps aux | grep transcendenced | wc -l` != 2 ]; then
+        >&2 echo "* transcendenced is not running. Please start it. Exiting..."
         exit 1
 fi
 
@@ -44,13 +51,11 @@ echo "PolisPay: $POLISHASH"
 echo ""
 
 # compare the blockhash with explorer
-if [ $EXPLORERHASH = $LOCALHASH ]
-then
+if [ $EXPLORERHASH = $LOCALHASH ]; then
         echo "* Your blockhash for block $SAFEBLOCKHEIGHT equals explorer's."
 
         # check if polis and explorer have consensus
-        if [ $EXPLORERHASH = $POLISHASH ]
-        then
+        if [ $EXPLORERHASH = $POLISHASH ]; then
                 echo "* Explorer and PolisPay have consensus."
                 echo -e "* You are ${GREEN}NOT FORKED${NC}. Everything is fine. Exiting..."
         else
@@ -63,8 +68,7 @@ else
         >&2 echo -e "It seems ${RED}YOU ARE FORKED${NC}. Exiting..."
 
         # send push notification - read README.MD
-        if [ $IFTTTKEY != 'none' ]
-        then
+        if [ $IFTTTKEY != 'none' ]; then
                 wget -q --post-data="{\"value1\":\"It seems `hostname` is FORKED.\"}" --header='Content-Type:application/json' https://maker.ifttt.com/trigger/notify/with/key/$IFTTTKEY
         fi
         exit 1
