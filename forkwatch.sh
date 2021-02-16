@@ -51,11 +51,11 @@ echo "PolisPay: $POLISHASH"
 echo ""
 
 # compare the blockhash with explorer
-if [ $EXPLORERHASH = $LOCALHASH ]; then
+if [ "$EXPLORERHASH" = "$LOCALHASH" ]; then
         echo "* Your blockhash for block $SAFEBLOCKHEIGHT equals explorer's."
 
         # check if polis and explorer have consensus
-        if [ $EXPLORERHASH = $POLISHASH ]; then
+        if [ "$EXPLORERHASH" = "$POLISHASH" ]; then
                 echo "* Explorer and PolisPay have consensus."
                 echo -e "* You are ${GREEN}NOT FORKED${NC}. Everything is fine. Exiting..."
         else
@@ -68,7 +68,7 @@ else
         >&2 echo -e "It seems ${RED}YOU ARE FORKED${NC}. Exiting..."
 
         # send push notification - read README.MD
-        if [ $IFTTTKEY != 'none' ]; then
+        if [ "$IFTTTKEY" != 'none' ]; then
                 wget -q --post-data="{\"value1\":\"It seems `hostname` is FORKED.\"}" --header='Content-Type:application/json' https://maker.ifttt.com/trigger/notify/with/key/$IFTTTKEY
         fi
         exit 1
