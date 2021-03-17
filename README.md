@@ -4,6 +4,9 @@
 Compares the blockhashes of explorer.teloscoin.org, telos.polispay.com and your local wallet and tells you if you are forked.
 
 ### forkwatch.bat
+
+forkwatch.bat relies on Windows 10, as this is the only version that ships with its own `curl`. If you are on an older Windows version, maybe you can download a Windows curl binary and put it in the same directory as the batch file and wallet binaries.
+
 #### Configuration
 Configuration is the same as for forkwatch.sh, but you have one configuration option more:
 * `JQ` - (default: jq-win32.exe) enter the path where jq-win32.exe resides, which you have downloaded from https://stedolan.github.io/jq/download/ - this has been tested with jq 1.6; if it is the same directory as this batch file, leave default value
