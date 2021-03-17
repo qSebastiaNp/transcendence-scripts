@@ -86,7 +86,7 @@ IF "%EXPLORERHASH%" == "%LOCALHASH%" (
 		ECHO * Explorer and PolisPay have consensus.
 		ECHO * You are NOT FORKED. Everything is fine. Exiting...
 	) ELSE (
-		ECHO * Explorer and PolisPay don't have consensus. Network is agitated."
+		ECHO * Explorer and PolisPay don't have consensus. Network is agitated.
 		ECHO * You SHOULD be NOT FORKED. Maybe run the test again in a few minutes. Not immediately.
 	)
 	PAUSE
