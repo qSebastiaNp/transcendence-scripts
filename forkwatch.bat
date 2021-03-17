@@ -1,4 +1,5 @@
 @ECHO OFF
+SETLOCAL EnableExtensions EnableDelayedExpansion
 REM forkwatch.sh v1.0.3 - qSebastiaNp
 
 REM config
@@ -30,48 +31,49 @@ tasklist /FI "IMAGENAME eq transcendence-qt.exe" 2>NUL | find /I /N "transcenden
 IF NOT "%ERRORLEVEL%" == "0" (
 	tasklist /FI "IMAGENAME eq transcendenced.exe" 2>NUL | find /I /N "transcendenced.exe">NUL
 	IF NOT "%ERRORLEVEL%" == "0" (
-        ECHO * transcendenced is not running. Please start it. Exiting...
+		ECHO * transcendenced is not running. Please start it. Exiting...
 		PAUSE
-        EXIT /b 1
+		EXIT /b 1
 	)
 )
 
-FOR /F "Delims=" %%A In ('"curl -s https://explorer.teloscoin.org/ext/getmasternodecount"') DO SET "MNCOUNT=%%~A"
-FOR /F "Delims=" %%B In ('"%TRANSCENDENCE% masternode count | %JQ% ."stable""') DO SET "LOCALMNCOUNT=%%~B"
+FOR /F "Delims=" %%A IN ('"curl -s https://explorer.teloscoin.org/ext/getmasternodecount"') DO SET "MNCOUNT=%%~A"
+FOR /F "Delims=" %%B IN ('"%TRANSCENDENCE% masternode count | %JQ% ."stable""') DO SET "LOCALMNCOUNT=%%~B"
 
 REM check if explorer knows enough masternodes, ELSE it may be forked
 SET /A "x=%LOCALMNCOUNT% / 2"
 IF %MNCOUNT% LSS %x% (
 	ECHO "* Explorer reports %MNCOUNT% MNs, which is much lower than your %LOCALMNCOUNT%. It may have forked. Exiting..."
+	PAUSE
 	EXIT /b 1
 )
 
 REM output blockhash overview
-FOR /F "Delims=" %%C In ('"curl -s https://explorer.teloscoin.org/api/getblockcount"') DO SET "BLOCKHEIGHT=%%~C"
+FOR /F "Delims=" %%C IN ('"curl -s https://explorer.teloscoin.org/api/getblockcount"') DO SET "BLOCKHEIGHT=%%~C"
 SET /A "SAFEBLOCKHEIGHT=%BLOCKHEIGHT% - %SAFEMARGIN%"
 
-FOR /F "Delims=" %%D In ('"%TRANSCENDENCE% getblockhash %SAFEBLOCKHEIGHT%"') DO SET "LOCALHASH=%%~D"
+FOR /F "Delims=" %%D IN ('"%TRANSCENDENCE% getblockhash %SAFEBLOCKHEIGHT%"') DO SET "LOCALHASH=%%~D"
 ECHO Local   : %LOCALHASH%
 
 @ping -n 2 localhost> nul
-FOR /F "Delims=" %%E In ('"curl -s https://explorer.teloscoin.org/api/getblockhash?index=%SAFEBLOCKHEIGHT%"') DO SET "EXPLORERHASH=%%~E"
+FOR /F "Delims=" %%E IN ('"curl -s https://explorer.teloscoin.org/api/getblockhash?index=%SAFEBLOCKHEIGHT%"') DO SET "EXPLORERHASH=%%~E"
 ECHO Explorer: %EXPLORERHASH%
 
-FOR /F "Delims=" %%F In ('"curl -s https://telos.polispay.com/api/block-index/%SAFEBLOCKHEIGHT% | %JQ% ."blockHash""') DO SET "POLISHASH=%%~F"
+FOR /F "Delims=" %%F IN ('"curl -s https://telos.polispay.com/api/block-index/%SAFEBLOCKHEIGHT% | %JQ% ."blockHash""') DO SET "POLISHASH=%%~F"
 ECHO PolisPay: %POLISHASH%
 ECHO.
 
 REM output blockheight information
-FOR /F "Delims=" %%G In ('"%TRANSCENDENCE% getblockcount"') DO SET "LOCALBLOCKHEIGHT=%%~G"
+FOR /F "Delims=" %%G IN ('"%TRANSCENDENCE% getblockcount"') DO SET "LOCALBLOCKHEIGHT=%%~G"
 IF %LOCALBLOCKHEIGHT% GTR %BLOCKHEIGHT% (
 	SET /A "INFRONT=%LOCALBLOCKHEIGHT% - %BLOCKHEIGHT%"
-	ECHO * You are %INFRONT% blocks in front of the explorer.
+	ECHO * You are !INFRONT! blocks in front of the explorer.
 ) ELSE (
 	IF %LOCALBLOCKHEIGHT% == %BLOCKHEIGHT% (
 		ECHO * You are at the same blockheight as the explorer.
 	) ELSE (
 		SET /A "LAGGING=%BLOCKHEIGHT% - %LOCALBLOCKHEIGHT%"
-		ECHO * You are lagging %LAGGING% blocks behind the explorer.
+		ECHO * You are lagging !LAGGING! blocks behind the explorer.
 	)
 )
 
@@ -87,6 +89,7 @@ IF "%EXPLORERHASH%" == "%LOCALHASH%" (
 		ECHO * Explorer and PolisPay don't have consensus. Network is agitated."
 		ECHO * You SHOULD be NOT FORKED. Maybe run the test again in a few minutes. Not immediately.
 	)
+	PAUSE
 	EXIT /b 0
 ) ELSE (
 	ECHO Your blockhash for block %SAFEBLOCKHEIGHT% differs from explorer's.
@@ -94,8 +97,9 @@ IF "%EXPLORERHASH%" == "%LOCALHASH%" (
 
 	REM send push notification - read README.MD
 	IF NOT "%IFTTTKEY%" == "none" (
-		FOR /F "Delims=" %%G In ('"hostname"') DO SET "HOSTNAME=%%~G"
+		FOR /F "Delims=" %%G IN ('"hostname"') DO SET "HOSTNAME=%%~G"
 		curl -X POST -H "Content-Type: application/json" -d "{\"value1\":\"It seems %HOSTNAME% is FORKED.\"}" https://maker.ifttt.com/trigger/notify/with/key/%IFTTTKEY% >NUL
 	)
+	PAUSE
 	EXIT /b 1
 )
