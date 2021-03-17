@@ -1,6 +1,6 @@
 @ECHO OFF
+REM forkwatch.bat v1.0.3 - qSebastiaNp
 SETLOCAL EnableExtensions EnableDelayedExpansion
-REM forkwatch.sh v1.0.3 - qSebastiaNp
 
 REM config
 REM use hash of (blockheight - $SAFEMARGIN) to rule out orphan hashes
