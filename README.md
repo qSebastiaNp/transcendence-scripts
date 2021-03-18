@@ -5,6 +5,8 @@ Compares the blockhashes of explorer.teloscoin.org, telos.polispay.com and your 
 
 ### forkwatch.bat
 
+![forkwatch.bat](https://abload.de/img/forkwatch_batch1hj83.png)
+
 forkwatch.bat relies on Windows 10, as this is the only version that ships with its own `curl`. If you are on an older Windows version, maybe you can download a Windows curl binary and put it in the same directory as the batch file and wallet binaries.
 
 #### Configuration
